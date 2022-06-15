@@ -101,3 +101,17 @@ output "ips" {
     name => ip.ip_address
   }
 }
+
+module "azure-k8s" {
+  source                 = "ondrejsika/azure-k8s/module"
+  version                = "0.2.1"
+  azurerm_resource_group = azurerm_resource_group.training
+  kubernetes_version     = "1.23.5"
+  name                   = "ondrejsika"
+  node_count             = 1
+}
+
+output "kubeconfig" {
+  value     = module.azure-k8s.kubeconfig
+  sensitive = true
+}
