@@ -54,6 +54,21 @@ locals {
     "0" = {}
     "1" = {}
   }
+  custom_data = <<EOF
+#cloud-config
+write_files:
+- path: /html/index.html
+  permissions: "0755"
+  owner: root:root
+  content: |
+    <h1>Hello from Cloud Init
+runcmd:
+  - |
+    apt update
+    apt install -y curl sudo git nginx
+    curl -fsSL https://ins.oxs.cz/slu-linux-amd64.sh | sudo sh
+    cp /html/index.html /var/www/html/index.html
+EOF
 }
 
 resource "azurerm_public_ip" "hello" {
@@ -73,6 +88,7 @@ module "vm--hello" {
   resource_group       = azurerm_resource_group.training
   public_ip_address_id = azurerm_public_ip.hello[each.key].id
   subnet_id            = azurerm_subnet.internal.id
+  custom_data          = local.custom_data
   ssh_keys = [
     azurerm_ssh_public_key.default.public_key,
     data.azurerm_ssh_public_key.petr.public_key,
