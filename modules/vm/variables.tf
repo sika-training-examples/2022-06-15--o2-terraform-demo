@@ -15,7 +15,7 @@ variable "public_ip_address_id" {
 
 variable "vm_size" {
   type    = string
-  default = "Standard_DS1_v2"
+  default = "Standard_B1ls"
 }
 
 variable "password" {
