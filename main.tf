@@ -130,3 +130,23 @@ output "ip" {
 output "ssh" {
   value = "default@${azurerm_public_ip.main.ip_address}"
 }
+
+resource "azurerm_public_ip" "foo" {
+  name                = "foo"
+  resource_group_name = azurerm_resource_group.training.name
+  location            = azurerm_resource_group.training.location
+  allocation_method   = "Static"
+}
+
+
+module "vm--foo" {
+  source               = "./modules/vm"
+  name                 = "foo"
+  resource_group       = azurerm_resource_group.training
+  public_ip_address_id = azurerm_public_ip.foo.id
+  subnet_id            = azurerm_subnet.internal.id
+  ssh_keys = [
+    azurerm_ssh_public_key.default.public_key,
+    data.azurerm_ssh_public_key.petr.public_key,
+  ]
+}
