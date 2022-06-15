@@ -50,25 +50,28 @@ resource "azurerm_subnet" "internal" {
 
 
 locals {
-  hello_vms_count = 2
+  hello_vms = {
+    "0" = {}
+    "1" = {}
+  }
 }
 
 resource "azurerm_public_ip" "hello" {
-  count = local.hello_vms_count
+  for_each = local.hello_vms
 
-  name                = "hello${count.index}"
+  name                = "hello${each.key}"
   resource_group_name = azurerm_resource_group.training.name
   location            = azurerm_resource_group.training.location
   allocation_method   = "Static"
 }
 
 module "vm--hello" {
-  count  = local.hello_vms_count
-  source = "./modules/vm"
+  for_each = local.hello_vms
+  source   = "./modules/vm"
 
-  name                 = "hello${count.index}"
+  name                 = "hello${each.key}"
   resource_group       = azurerm_resource_group.training
-  public_ip_address_id = azurerm_public_ip.hello[count.index].id
+  public_ip_address_id = azurerm_public_ip.hello[each.key].id
   subnet_id            = azurerm_subnet.internal.id
   ssh_keys = [
     azurerm_ssh_public_key.default.public_key,
@@ -77,5 +80,8 @@ module "vm--hello" {
 }
 
 output "ips" {
-  value = azurerm_public_ip.hello[*].ip_address
+  value = {
+    for name, ip in azurerm_public_ip.hello :
+    name => ip.ip_address
+  }
 }
