@@ -1,3 +1,7 @@
+locals {
+  password = var.password == "" ? random_password.password[0].result : var.password
+}
+
 resource "random_password" "password" {
   count            = var.password == "" ? 1 : 0
   length           = 16
@@ -44,7 +48,7 @@ resource "azurerm_virtual_machine" "this" {
   os_profile {
     computer_name  = var.name
     admin_username = "default"
-    admin_password = var.password == "" ? random_password.password[0].result : var.password
+    admin_password = local.password
   }
   os_profile_linux_config {
     disable_password_authentication = false
