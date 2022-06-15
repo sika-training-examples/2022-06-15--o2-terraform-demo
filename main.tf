@@ -5,6 +5,9 @@ locals {
 resource "azurerm_resource_group" "training" {
   name     = "training-ondrejsika"
   location = local.LOCATION
+  tags = {
+    terraform = "terraform"
+  }
 }
 
 resource "azurerm_ssh_public_key" "default" {
