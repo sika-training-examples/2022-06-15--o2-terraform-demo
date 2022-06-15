@@ -150,3 +150,14 @@ module "vm--foo" {
     data.azurerm_ssh_public_key.petr.public_key,
   ]
 }
+
+
+output "foo-ip" {
+  value = azurerm_public_ip.foo.ip_address
+}
+
+
+output "foo-password" {
+  value     = module.vm--foo.password
+  sensitive = true
+}
