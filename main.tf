@@ -16,3 +16,20 @@ resource "azurerm_ssh_public_key" "default" {
   location            = azurerm_resource_group.training.location
   public_key          = file("./ssh-keys/ondrejsika.pub")
 }
+
+
+data "azurerm_resource_group" "petr" {
+  name = "training-simik"
+}
+
+data "azurerm_ssh_public_key" "petr" {
+  name                = "petrsimik"
+  resource_group_name = data.azurerm_resource_group.petr.name
+}
+
+output "ssh_key_ids" {
+  value = [
+    azurerm_ssh_public_key.default.id,
+    data.azurerm_ssh_public_key.petr.id,
+  ]
+}
