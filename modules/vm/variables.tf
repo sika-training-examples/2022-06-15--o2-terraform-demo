@@ -30,3 +30,8 @@ variable "ssh_keys" {
   default     = []
   description = "List of public key data"
 }
+
+variable "custom_data" {
+  type    = string
+  default = null
+}
