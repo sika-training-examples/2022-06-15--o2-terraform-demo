@@ -48,19 +48,27 @@ resource "azurerm_subnet" "internal" {
   address_prefixes     = ["10.0.0.0/24"]
 }
 
-resource "azurerm_public_ip" "foo" {
-  name                = "foo"
+
+locals {
+  hello_vms_count = 2
+}
+
+resource "azurerm_public_ip" "hello" {
+  count = local.hello_vms_count
+
+  name                = "hello${count.index}"
   resource_group_name = azurerm_resource_group.training.name
   location            = azurerm_resource_group.training.location
   allocation_method   = "Static"
 }
 
+module "vm--hello" {
+  count  = local.hello_vms_count
+  source = "./modules/vm"
 
-module "vm--foo" {
-  source               = "./modules/vm"
-  name                 = "foo"
+  name                 = "hello${count.index}"
   resource_group       = azurerm_resource_group.training
-  public_ip_address_id = azurerm_public_ip.foo.id
+  public_ip_address_id = azurerm_public_ip.hello[count.index].id
   subnet_id            = azurerm_subnet.internal.id
   ssh_keys = [
     azurerm_ssh_public_key.default.public_key,
@@ -68,32 +76,6 @@ module "vm--foo" {
   ]
 }
 
-
-output "foo-ip" {
-  value = azurerm_public_ip.foo.ip_address
-}
-
-
-output "foo-password" {
-  value     = module.vm--foo.password
-  sensitive = true
-}
-
-resource "azurerm_public_ip" "main" {
-  name                = "ondrejsika"
-  resource_group_name = azurerm_resource_group.training.name
-  location            = azurerm_resource_group.training.location
-  allocation_method   = "Static"
-}
-
-module "vm--ondrejsika" {
-  source               = "./modules/vm"
-  name                 = "ondrejsika"
-  resource_group       = azurerm_resource_group.training
-  public_ip_address_id = azurerm_public_ip.main.id
-  subnet_id            = azurerm_subnet.internal.id
-  ssh_keys = [
-    azurerm_ssh_public_key.default.public_key,
-    data.azurerm_ssh_public_key.petr.public_key,
-  ]
+output "ips" {
+  value = azurerm_public_ip.hello[*].ip_address
 }
